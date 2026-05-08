@@ -1,10 +1,23 @@
 # ML artifacts
-models/
-outputs/
-data/
 *.pkl
 *.json
+*.csv
 
 # Python cache
 __pycache__/
 *.pyc
+# Python
+
+# ML artifacts
+models/
+outputs/
+data/
+
+# But keep folder structure
+!models/.gitkeep
+!outputs/.gitkeep
+!data/.gitkeep
+
+# Virtual environment
+venv/
+.env
