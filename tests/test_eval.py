@@ -1,25 +1,16 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+import os
+import json
 
-def test_evaluation_metrics():
-    df = pd.read_csv(r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv")
+EVAL_PATH = "models/evaluation_metrics.json"
 
-    target = "HasFailure"
+def test_eval_file_exists():
 
-    X = df.drop(columns=[target], errors="ignore")
-    y = df[target]
+    assert os.path.exists(EVAL_PATH)
 
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
+def test_eval_content():
 
-    model = RandomForestClassifier(n_estimators=10, random_state=42)
-    model.fit(X_train, y_train)
+    with open(EVAL_PATH, "r") as f:
+        data = json.load(f)
 
-    preds = model.predict(X_test)
-
-    acc = accuracy_score(y_test, preds)
-
-    assert 0.0 <= acc <= 1.0
+    assert "accuracy" in data
+    assert "roc_auc" in data

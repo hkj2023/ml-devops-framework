@@ -1,21 +1,11 @@
-import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
+import os
+import joblib
 
-def test_model_training():
-    df = pd.read_csv(r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv")
+MODEL_PATH = "models/hasfailure_model.pkl"
 
-    target = "HasFailure"
+def test_model_exists():
+    assert os.path.exists(MODEL_PATH)
 
-    X = df.drop(columns=[target], errors="ignore")
-    y = df[target]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42
-    )
-
-    model = RandomForestClassifier(n_estimators=10, random_state=42)
-    model.fit(X_train, y_train)
-
+def test_model_load():
+    model = joblib.load(MODEL_PATH)
     assert model is not None
-    assert len(model.feature_importances_) == X_train.shape[1]
