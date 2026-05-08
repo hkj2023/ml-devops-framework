@@ -2,16 +2,15 @@
 *.pkl
 *.json
 *.csv
+models/
+outputs/
+data/
 
 # Python cache
 __pycache__/
 *.pyc
 # Python
 
-# ML artifacts
-models/
-outputs/
-data/
 
 # But keep folder structure
 !models/.gitkeep
