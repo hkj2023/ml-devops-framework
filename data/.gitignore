@@ -1,0 +1,10 @@
+# ML artifacts
+models/
+outputs/
+data/
+*.pkl
+*.json
+
+# Python cache
+__pycache__/
+*.pyc
