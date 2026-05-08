@@ -2,32 +2,22 @@ import pandas as pd
 import joblib
 import json
 
-MODEL_PATH = r"models/hasfailure_model.pkl"
+MODEL_PATH = "models/hasfailure_model.pkl"
+FEATURE_PATH = "models/feature_names.json"
 
-FEATURE_PATH = r"models/feature_names.json"
+def test_inference():
 
-def test_prediction_shape():
-
-    # Load trained model
     model = joblib.load(MODEL_PATH)
 
-    # Load feature names used during training
     with open(FEATURE_PATH, "r") as f:
-        feature_names = json.load(f)
+        features = json.load(f)
 
-    # Load dataset
-    df = pd.read_csv(
-        r"data/ml_ready_dataset.csv"
-    )
+    df = pd.read_csv("data/ml_ready_dataset.csv")
 
-    # Remove target column
-    X = df.drop(columns=["HasFailure"], errors="ignore")
+    df = df.drop(columns=["HasFailure"], errors="ignore")
 
-    # Keep ONLY training features
-    X = X[feature_names]
+    df = df.reindex(columns=features, fill_value=0)
 
-    # Predict
-    preds = model.predict(X.head(5))
+    preds = model.predict(df.head(5))
 
-    # Assertions
     assert len(preds) == 5
