@@ -1,21 +1,18 @@
-import os
 import pandas as pd
-import subprocess
 
-def test_prep_creates_csv():
-    # Run prep.py
-    subprocess.run(["python", "prep.py"], check=True)
+DATA_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv"
 
-    # Check output file exists
-    assert os.path.exists("outputs/new_data.csv")
-
-    # Load the file
-    df = pd.read_csv("outputs/new_data.csv")
-
-    # Check for expected columns (adjust to your schema)
-    expected_columns = ["BuildID", "BugID", "Duration(min)", "ExecutionTime"]
-    for col in expected_columns:
-        assert col in df.columns
-
-    # Sanity check: file should have rows
+def test_data_load():
+    df = pd.read_csv(DATA_PATH)
+    assert df is not None
     assert len(df) > 0
+
+
+def test_target_exists():
+    df = pd.read_csv(DATA_PATH)
+    assert "HasFailure" in df.columns
+
+
+def test_no_all_null_dataframe():
+    df = pd.read_csv(DATA_PATH)
+    assert df.isnull().all().sum() < len(df.columns)

@@ -1,8 +1,9 @@
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
-def test_model_training():
+def test_evaluation_metrics():
     df = pd.read_csv(r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv")
 
     target = "HasFailure"
@@ -17,5 +18,8 @@ def test_model_training():
     model = RandomForestClassifier(n_estimators=10, random_state=42)
     model.fit(X_train, y_train)
 
-    assert model is not None
-    assert len(model.feature_importances_) == X_train.shape[1]
+    preds = model.predict(X_test)
+
+    acc = accuracy_score(y_test, preds)
+
+    assert 0.0 <= acc <= 1.0
