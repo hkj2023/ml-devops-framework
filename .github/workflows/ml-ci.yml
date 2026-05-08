@@ -1,18 +1,18 @@
-name: ML DevOps CI
+name: ML DevOps Pipeline
 
 on:
   push:
   pull_request:
 
 jobs:
-  test:
+  pipeline:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -22,5 +22,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # ======================
+      # 1. DATA PREP
+      # ======================
+      - name: Run data prep
+        run: python src/prep.py
+
+      # ======================
+      # 2. TRAINING
+      # ======================
+      - name: Train model
+        run: python src/train.py
+
+      # ======================
+      # 3. EVALUATION
+      # ======================
+      - name: Evaluate model
+        run: python src/eval.py
+
+      # ======================
+      # 4. TESTS (FINAL CHECK)
+      # ======================
       - name: Run tests
         run: pytest
