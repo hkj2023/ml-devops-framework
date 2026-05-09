@@ -1,10 +1,10 @@
 # ML artifacts
 *.pkl
-*.json
-*.csv
-models/
-outputs/
-data/
+ *.json
+ *.csv
+ models/
+ outputs/
+ data/
 
 # Python cache
 __pycache__/
