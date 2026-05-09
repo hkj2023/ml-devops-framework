@@ -1,224 +1,116 @@
 import pandas as pd
 import joblib
 import json
+import os
 
-from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import (
-    classification_report,
-    confusion_matrix,
-    accuracy_score,
-    balanced_accuracy_score,
-    roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score
+
+import mlflow
+
+# ============================================
+# PATHS
+# ============================================
+
+TRAIN_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\processed\train.csv"
+MODEL_DIR = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models"
+
+os.makedirs(MODEL_DIR, exist_ok=True)
+
+# ============================================
+# LOAD DATA
+# ============================================
+
+print("Loading training data...")
+train_df = pd.read_csv(TRAIN_PATH)
+
+TARGET = "HasFailure"
+
+print("Training data shape:", train_df.shape)
+
+# ============================================
+# SPLIT FEATURES AND TARGET
+# ============================================
+
+print("Separating features and target...")
+
+X_train = train_df.drop(columns=[TARGET])
+y_train = train_df[TARGET]
+
+print("Feature shape:", X_train.shape)
+print("Target shape:", y_train.shape)
+
+# ============================================
+# TRAIN MODEL
+# ============================================
+
+print("Training Random Forest model...")
+
+model = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=10,
+    random_state=42,
+    n_jobs=-1,
+    class_weight="balanced"
 )
-from sklearn.utils import resample
 
-# =====================================================
-# LOAD DATASET
-# =====================================================
+model.fit(X_train, y_train)
 
-print("\n================ LOADING DATASET ================\n")
+print("Model training complete.")
 
-df = pd.read_csv(
-    r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv"
-)
+# ============================================
+# EVALUATION (ON TRAIN SET OR TEST SET)
+# ============================================
 
-print("Dataset Shape:", df.shape)
+y_pred = model.predict(X_train)
+y_prob = model.predict_proba(X_train)[:, 1]
 
-# =====================================================
-# REMOVE DUPLICATES
-# =====================================================
+accuracy = accuracy_score(y_train, y_pred)
+roc_auc = roc_auc_score(y_train, y_prob)
 
-print("\n================ REMOVING DUPLICATES ================\n")
+print("Accuracy:", accuracy)
+print("ROC-AUC:", roc_auc)
 
-df = df.drop_duplicates()
-print("Dataset Shape after duplicates:", df.shape)
+# ============================================
+# MLFLOW TRACKING (CORRECT PLACE)
+# ============================================
 
-# =====================================================
-# HANDLE NULL VALUES
-# =====================================================
+mlflow.set_tracking_uri("file:./mlruns")
 
-print("\n================ NULL VALUE CHECK ================\n")
+with mlflow.start_run():
 
-df = df.fillna(0)
+    mlflow.log_param("model", "RandomForest")
+    mlflow.log_param("n_estimators", 200)
+    mlflow.log_param("max_depth", 10)
+    mlflow.log_param("class_weight", "balanced")
 
-print("Null values handled")
+    mlflow.log_metric("accuracy", accuracy)
+    mlflow.log_metric("roc_auc", roc_auc)
 
-# =====================================================
-# TARGET COLUMN
-# =====================================================
+# ============================================
+# SAVE MODEL
+# ============================================
 
-target = "HasFailure"
+model_path = os.path.join(MODEL_DIR, "hasfailure_model.pkl")
+joblib.dump(model, model_path)
 
-# =====================================================
-# REMOVE LEAKAGE COLUMNS
-# =====================================================
+print("Model saved:", model_path)
 
-print("\n================ REMOVING LEAKAGE COLUMNS ================\n")
+# ============================================
+# SAVE FEATURE NAMES
+# ============================================
 
-leakage_cols = [
-    "HasFailure",
-    "DefectLabel",
-    "DefectCount",
-    "Result_fail",
-    "Result_pass",
-    "FailureRate",
-    "FailureRatio",
-    "SuccessRate",
-    "TestsFailed",
-    "BugID",
-    "Fix Time",
-    "Status_y_failed",
-    "Status_failed",
-    "CommitID",
-    "BuildID",
-    "LogID",
-    "TestID_x",
-    "TestID_y",
-    "Severity",
-    "Status_x"
-]
+feature_names = X_train.columns.tolist()
 
-existing_leakage_cols = [c for c in leakage_cols if c in df.columns]
-
-X = df.drop(columns=existing_leakage_cols, errors="ignore")
-y = df[target]
-
-print("Remaining Features:", X.shape[1])
-
-# =====================================================
-# SAVE FEATURE NAMES (IMPORTANT FOR INFERENCE FIX)
-# =====================================================
-
-feature_names = X.columns.tolist()
-
-feature_path = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\feature_names.json"
+feature_path = os.path.join(MODEL_DIR, "feature_names.json")
 
 with open(feature_path, "w") as f:
     json.dump(feature_names, f, indent=4)
 
-print("Feature names saved")
+print("Feature names saved:", feature_path)
 
-# =====================================================
-# TRAIN TEST SPLIT
-# =====================================================
+# ============================================
+# DONE
+# ============================================
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
-)
-
-# =====================================================
-# BALANCE TRAINING DATA ONLY
-# =====================================================
-
-train_df = pd.concat([X_train, y_train], axis=1)
-
-majority = train_df[train_df[target] == 1]
-minority = train_df[train_df[target] == 0]
-
-minority_up = resample(
-    minority,
-    replace=True,
-    n_samples=len(majority),
-    random_state=42
-)
-
-train_balanced = pd.concat([majority, minority_up]).sample(frac=1, random_state=42)
-
-X_train = train_balanced.drop(columns=[target])
-y_train = train_balanced[target]
-
-# =====================================================
-# MODEL TRAINING
-# =====================================================
-
-print("\n================ TRAINING MODEL ================\n")
-
-clf = RandomForestClassifier(
-    n_estimators=200,
-    max_depth=10,
-    random_state=42,
-    n_jobs=-1
-)
-
-clf.fit(X_train, y_train)
-
-print("Model trained")
-
-# =====================================================
-# EVALUATION
-# =====================================================
-
-y_pred = clf.predict(X_test)
-y_prob = clf.predict_proba(X_test)[:, 1]
-
-accuracy = accuracy_score(y_test, y_pred)
-balanced_acc = balanced_accuracy_score(y_test, y_pred)
-roc_auc = roc_auc_score(y_test, y_prob)
-
-print("Accuracy:", accuracy)
-print("Balanced Accuracy:", balanced_acc)
-print("ROC-AUC:", roc_auc)
-
-# =====================================================
-# FEATURE IMPORTANCE (CSV + JSON)
-# =====================================================
-
-importance_df = pd.DataFrame({
-    "Feature": X.columns,
-    "Importance": clf.feature_importances_
-}).sort_values(by="Importance", ascending=False)
-
-# CSV
-importance_csv = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\outputs\hasfailure_feature_importance.csv"
-importance_df.to_csv(importance_csv, index=False)
-
-# JSON
-importance_json_path = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\hasfailure_feature_importance.json"
-
-feature_importance_json = [
-    {"feature": row["Feature"], "importance": float(row["Importance"])}
-    for _, row in importance_df.iterrows()
-]
-
-with open(importance_json_path, "w") as f:
-    json.dump(feature_importance_json, f, indent=4)
-
-print("Feature importance saved (CSV + JSON)")
-
-# =====================================================
-# SAVE MODEL
-# =====================================================
-
-model_path = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\hasfailure_model.pkl"
-
-joblib.dump(clf, model_path)
-
-print("Model saved:", model_path)
-
-# =====================================================
-# SAVE TRAINING METRICS (IMPORTANT FOR DEVOPS)
-# =====================================================
-
-metrics = {
-    "accuracy": float(accuracy),
-    "balanced_accuracy": float(balanced_acc),
-    "roc_auc": float(roc_auc)
-}
-
-metrics_path = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\training_metrics.json"
-
-with open(metrics_path, "w") as f:
-    json.dump(metrics, f, indent=4)
-
-print("Metrics saved")
-
-# =====================================================
-# SUMMARY
-# =====================================================
-
-print("\n================ DONE ================\n")
-print("Training pipeline completed successfully")
+print("Training pipeline completed successfully.")

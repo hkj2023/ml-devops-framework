@@ -1,7 +1,6 @@
 import pandas as pd
 import joblib
 import json
-
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
@@ -14,19 +13,19 @@ from sklearn.metrics import (
 # PATHS
 # =====================================================
 
-DATA_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv"
+DATA_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\processed\test.csv"
 
 MODEL_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\hasfailure_model.pkl"
 
 FEATURE_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\feature_names.json"
 
-OUTPUT_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\evaluation_metrics.json"
+OUTPUT_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\outputs\evaluation_metrics.json"
 
 # =====================================================
-# LOAD DATA
+# LOAD TEST DATA
 # =====================================================
 
-print("\n================ LOADING DATA ================\n")
+print("\n================ LOADING TEST DATA ================\n")
 
 df = pd.read_csv(DATA_PATH)
 
@@ -42,7 +41,7 @@ model = joblib.load(MODEL_PATH)
 print("Model loaded successfully")
 
 # =====================================================
-# LOAD FEATURE NAMES (CRITICAL FIX FOR YOUR ERROR)
+# LOAD FEATURE NAMES
 # =====================================================
 
 print("\n================ LOADING FEATURE SCHEMA ================\n")
@@ -56,7 +55,7 @@ print(f"Expected features: {len(feature_names)}")
 # SPLIT FEATURES / TARGET
 # =====================================================
 
-X = df[feature_names]   # ensures SAME ORDER + SAME COLUMNS
+X = df[feature_names]
 y = df[target]
 
 # =====================================================
@@ -66,7 +65,6 @@ y = df[target]
 print("\n================ RUNNING PREDICTION ================\n")
 
 y_pred = model.predict(X)
-
 y_prob = model.predict_proba(X)[:, 1]
 
 # =====================================================
@@ -80,11 +78,10 @@ balanced_acc = balanced_accuracy_score(y, y_pred)
 roc_auc = roc_auc_score(y, y_prob)
 
 conf_matrix = confusion_matrix(y, y_pred).tolist()
-
 class_report = classification_report(y, y_pred, output_dict=True)
 
 # =====================================================
-# SAVE EVALUATION METRICS (JSON ARTIFACT)
+# SAVE METRICS
 # =====================================================
 
 metrics = {
@@ -98,14 +95,8 @@ metrics = {
 with open(OUTPUT_PATH, "w") as f:
     json.dump(metrics, f, indent=4)
 
-print("\n================ SAVED =================")
-print(f"Evaluation metrics saved to: {OUTPUT_PATH}")
-
-# =====================================================
-# SUMMARY
-# =====================================================
-
 print("\n================ FINAL RESULTS ================\n")
 print("Accuracy:", accuracy)
 print("Balanced Accuracy:", balanced_acc)
 print("ROC-AUC:", roc_auc)
+print(f"\nMetrics saved to: {OUTPUT_PATH}")

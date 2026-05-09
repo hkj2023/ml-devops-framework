@@ -25,7 +25,7 @@ with open(feature_path, "r") as f:
 # LOAD NEW DATA
 # =====================================================
 
-data_path = r"C:\Users\OLLRP\Desktop\Test\new_data.csv"
+data_path = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\src\ml_ready_dataset.csv"
 df = pd.read_csv(data_path)
 
 print("📊 Input Shape:", df.shape)
