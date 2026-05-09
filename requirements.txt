@@ -4,3 +4,5 @@ scikit-learn
 joblib
 imbalanced-learn
 matplotlib
+pytest
+mlflow
