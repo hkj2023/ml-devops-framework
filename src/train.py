@@ -9,11 +9,11 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 import mlflow
 
 # ============================================
-# PATHS
+# PATHS (RELATIVE PATHS)
 # ============================================
 
-TRAIN_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\processed\train.csv"
-MODEL_DIR = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models"
+TRAIN_PATH = "data/processed/train.csv"
+MODEL_DIR = "models"
 
 os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -59,7 +59,7 @@ model.fit(X_train, y_train)
 print("Model training complete.")
 
 # ============================================
-# EVALUATION (ON TRAIN SET OR TEST SET)
+# QUICK TRAIN METRICS (for MLflow logging only)
 # ============================================
 
 y_pred = model.predict(X_train)
@@ -68,24 +68,23 @@ y_prob = model.predict_proba(X_train)[:, 1]
 accuracy = accuracy_score(y_train, y_pred)
 roc_auc = roc_auc_score(y_train, y_prob)
 
-print("Accuracy:", accuracy)
-print("ROC-AUC:", roc_auc)
+print("Train Accuracy:", accuracy)
+print("Train ROC-AUC:", roc_auc)
 
 # ============================================
-# MLFLOW TRACKING (CORRECT PLACE)
+# MLFLOW TRACKING
 # ============================================
 
 mlflow.set_tracking_uri("file:./mlruns")
 
 with mlflow.start_run():
-
     mlflow.log_param("model", "RandomForest")
     mlflow.log_param("n_estimators", 200)
     mlflow.log_param("max_depth", 10)
     mlflow.log_param("class_weight", "balanced")
 
-    mlflow.log_metric("accuracy", accuracy)
-    mlflow.log_metric("roc_auc", roc_auc)
+    mlflow.log_metric("train_accuracy", accuracy)
+    mlflow.log_metric("train_roc_auc", roc_auc)
 
 # ============================================
 # SAVE MODEL

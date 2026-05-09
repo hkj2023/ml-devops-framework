@@ -4,28 +4,23 @@ import json
 from sklearn.model_selection import train_test_split
 
 # =====================================================
-# PATHS
+# PATHS (RELATIVE PATHS: LOCAL + GITHUB + DOCKER SAFE)
 # =====================================================
 
-RAW_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\ml_ready_dataset.csv"
-
-OUTPUT_DIR = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\processed"
-
-SCHEMA_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\feature_names.json"
+RAW_PATH = "data/ml_ready_dataset.csv"
+OUTPUT_DIR = "data/processed"
+SCHEMA_PATH = "models/feature_names.json"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-schema_dir = os.path.dirname(SCHEMA_PATH)
-
-if schema_dir:
-    os.makedirs(schema_dir, exist_ok=True)
+os.makedirs("models", exist_ok=True)
 
 # =====================================================
-# CONFIGURATION (MOST IMPORTANT PART)
+# CONFIGURATION
 # =====================================================
 
 TARGET = "HasFailure"
 
-# ❌ EVERYTHING HERE IS FORBIDDEN (LEAKAGE / POST-OUTCOME FEATURES)
+# Forbidden leakage / post-outcome columns
 LEAKAGE_COLUMNS = [
     "FailureRate",
     "FailureRatio",
@@ -67,13 +62,12 @@ if TARGET not in df.columns:
     raise ValueError(f"Target column '{TARGET}' not found!")
 
 # =====================================================
-# REMOVE LEAKAGE COLUMNS (STRICT ENFORCEMENT)
+# REMOVE LEAKAGE COLUMNS
 # =====================================================
 
 print("\nRemoving leakage columns...")
 
 existing_leakage = [col for col in LEAKAGE_COLUMNS if col in df.columns]
-
 df = df.drop(columns=existing_leakage, errors="ignore")
 
 print("Removed leakage columns:", existing_leakage)
@@ -99,20 +93,19 @@ print("\nEncoding categorical variables...")
 df_encoded = pd.get_dummies(df)
 
 # =====================================================
-# FINAL SAFETY CHECK (CRITICAL)
+# FINAL SAFETY CHECK
 # =====================================================
 
 print("\nFinal safety check...")
 
-# ensure target still exists
 if TARGET not in df_encoded.columns:
     raise ValueError("Target column lost during processing!")
 
-# remove target from features
+# Remove target from feature schema
 features_df = df_encoded.drop(columns=[TARGET])
 
 # =====================================================
-# FREEZE FEATURE SCHEMA
+# SAVE FEATURE SCHEMA
 # =====================================================
 
 feature_names = features_df.columns.tolist()

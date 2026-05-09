@@ -1,6 +1,8 @@
 import pandas as pd
 import joblib
 import json
+import os
+
 from sklearn.metrics import (
     accuracy_score,
     balanced_accuracy_score,
@@ -10,16 +12,15 @@ from sklearn.metrics import (
 )
 
 # =====================================================
-# PATHS
+# PATHS (RELATIVE PATHS)
 # =====================================================
 
-DATA_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\processed\test.csv"
+DATA_PATH = "data/processed/test.csv"
+MODEL_PATH = "models/hasfailure_model.pkl"
+FEATURE_PATH = "models/feature_names.json"
+OUTPUT_PATH = "outputs/evaluation_metrics.json"
 
-MODEL_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\hasfailure_model.pkl"
-
-FEATURE_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\feature_names.json"
-
-OUTPUT_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\outputs\evaluation_metrics.json"
+os.makedirs("outputs", exist_ok=True)
 
 # =====================================================
 # LOAD TEST DATA
@@ -29,7 +30,7 @@ print("\n================ LOADING TEST DATA ================\n")
 
 df = pd.read_csv(DATA_PATH)
 
-target = "HasFailure"
+TARGET = "HasFailure"
 
 # =====================================================
 # LOAD MODEL
@@ -41,7 +42,7 @@ model = joblib.load(MODEL_PATH)
 print("Model loaded successfully")
 
 # =====================================================
-# LOAD FEATURE NAMES
+# LOAD FEATURE SCHEMA
 # =====================================================
 
 print("\n================ LOADING FEATURE SCHEMA ================\n")
@@ -56,10 +57,10 @@ print(f"Expected features: {len(feature_names)}")
 # =====================================================
 
 X = df[feature_names]
-y = df[target]
+y = df[TARGET]
 
 # =====================================================
-# PREDICTION
+# RUN PREDICTION
 # =====================================================
 
 print("\n================ RUNNING PREDICTION ================\n")
@@ -68,7 +69,7 @@ y_pred = model.predict(X)
 y_prob = model.predict_proba(X)[:, 1]
 
 # =====================================================
-# METRICS
+# COMPUTE METRICS
 # =====================================================
 
 print("\n================ COMPUTING METRICS ================\n")
@@ -78,7 +79,13 @@ balanced_acc = balanced_accuracy_score(y, y_pred)
 roc_auc = roc_auc_score(y, y_prob)
 
 conf_matrix = confusion_matrix(y, y_pred).tolist()
-class_report = classification_report(y, y_pred, output_dict=True)
+
+class_report = classification_report(
+    y,
+    y_pred,
+    output_dict=True,
+    zero_division=0
+)
 
 # =====================================================
 # SAVE METRICS
@@ -94,6 +101,10 @@ metrics = {
 
 with open(OUTPUT_PATH, "w") as f:
     json.dump(metrics, f, indent=4)
+
+# =====================================================
+# FINAL REPORT
+# =====================================================
 
 print("\n================ FINAL RESULTS ================\n")
 print("Accuracy:", accuracy)
