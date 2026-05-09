@@ -1,5 +1,5 @@
 # ML artifacts
-*.pkl
+# *.pkl
 # *.json
 # *.csv
 # models/
