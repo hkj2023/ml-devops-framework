@@ -8,4 +8,4 @@ RUN pip install mlflow
 
 COPY . .
 
-CMD ["python", "src/train.py"]
+CMD ["bash", "-c", "python src/prep.py && python src/train.py && python src/eval.py"]
