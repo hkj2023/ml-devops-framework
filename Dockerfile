@@ -1,9 +1,11 @@
-FROM python:3.10
+FROM python:3.10-slim
 
 WORKDIR /app
 
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install mlflow
+
 COPY . .
 
-RUN pip install -r requirements.txt
-
-CMD ["python", "src/prep.py"]
+CMD ["python", "src/train.py"]
