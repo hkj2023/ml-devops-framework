@@ -31,7 +31,7 @@ jobs:
       - name: Run tests (module1)
         run: docker run ml-pipeline pytest tests/test_module1.py -v --json-report --json-report-file=results.json
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: module1-test-results
           path: results.json
