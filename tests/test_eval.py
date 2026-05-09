@@ -1,16 +1,22 @@
-import os
 import json
+import os
 
-EVAL_PATH = "models/evaluation_metrics.json"
+METRICS_PATH = "outputs/evaluation_metrics.json"
 
-def test_eval_file_exists():
+def test_metrics_file_exists():
+    assert os.path.exists(METRICS_PATH)
 
-    assert os.path.exists(EVAL_PATH)
+def test_metrics_structure():
+    with open(METRICS_PATH, "r") as f:
+        metrics = json.load(f)
 
-def test_eval_content():
+    assert "accuracy" in metrics
+    assert "roc_auc" in metrics
+    assert "balanced_accuracy" in metrics
 
-    with open(EVAL_PATH, "r") as f:
-        data = json.load(f)
+def test_metrics_range():
+    with open(METRICS_PATH, "r") as f:
+        metrics = json.load(f)
 
-    assert "accuracy" in data
-    assert "roc_auc" in data
+    assert 0 <= metrics["accuracy"] <= 1
+    assert 0 <= metrics["roc_auc"] <= 1

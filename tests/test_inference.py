@@ -1,33 +1,23 @@
 import pandas as pd
 import joblib
-import json
 
-MODEL_PATH = r"models/hasfailure_model.pkl"
+MODEL_PATH = "models/hasfailure_model.pkl"
+TEST_PATH = "data/processed/test.csv"
 
-FEATURE_PATH = r"models/feature_names.json"
-
-def test_prediction_shape():
-
-    # Load trained model
+def test_prediction_runs():
     model = joblib.load(MODEL_PATH)
+    df = pd.read_csv(TEST_PATH)
 
-    # Load feature names used during training
-    with open(FEATURE_PATH, "r") as f:
-        feature_names = json.load(f)
+    X = df.drop(columns=["HasFailure"])
+    preds = model.predict(X)
 
-    # Load dataset
-    df = pd.read_csv(
-        r"data/ml_ready_dataset.csv"
-    )
+    assert len(preds) == len(X)
 
-    # Remove target column
-    X = df.drop(columns=["HasFailure"], errors="ignore")
+def test_predictions_valid_classes():
+    model = joblib.load(MODEL_PATH)
+    df = pd.read_csv(TEST_PATH)
 
-    # Keep ONLY training features
-    X = X[feature_names]
+    X = df.drop(columns=["HasFailure"])
+    preds = model.predict(X)
 
-    # Predict
-    preds = model.predict(X.head(5))
-
-    # Assertions
-    assert len(preds) == 5
+    assert set(preds).issubset({0, 1})
