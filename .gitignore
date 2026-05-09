@@ -13,9 +13,9 @@ __pycache__/
 
 
 # But keep folder structure
-!models/.gitkeep
-!outputs/.gitkeep
-!data/.gitkeep
+# !models/.gitkeep
+# !outputs/.gitkeep
+# !data/.gitkeep
 
 # Virtual environment
 venv/
