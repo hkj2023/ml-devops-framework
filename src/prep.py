@@ -14,7 +14,10 @@ OUTPUT_DIR = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\data\proce
 SCHEMA_PATH = r"C:\Users\OLLRP\Documents\Framework\ml-devops-framework\models\feature_names.json"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs(os.path.dirname(SCHEMA_PATH), exist_ok=True)
+schema_dir = os.path.dirname(SCHEMA_PATH)
+
+if schema_dir:
+    os.makedirs(schema_dir, exist_ok=True)
 
 # =====================================================
 # CONFIGURATION (MOST IMPORTANT PART)
