@@ -22,25 +22,37 @@ jobs:
         run: docker build -t ml-pipeline .
 
       # ============================================
-      # 3. Evaluate pre-trained model
+      # 3. Run anomaly detection
+      # ============================================
+      - name: Run anomaly detection
+        run: docker run ml-pipeline python src/anomaly.py
+
+      # ============================================
+      # 4. Run clustering analysis
+      # ============================================
+      - name: Run clustering analysis
+        run: docker run ml-pipeline python src/clustering.py
+
+      # ============================================
+      # 5. Evaluate pre-trained model
       # ============================================
       - name: Evaluate model
         run: docker run ml-pipeline python src/eval.py
 
       # ============================================
-      # 4. Run inference (risk prediction)
+      # 6. Run inference (risk prediction)
       # ============================================
       - name: Run inference
         run: docker run ml-pipeline python src/inference.py
 
       # ============================================
-      # 5. Run decision engine (adaptive testing)
+      # 7. Run decision engine (adaptive testing)
       # ============================================
       - name: Run decision engine
         run: docker run ml-pipeline python src/decision_engine.py > test_path.txt
 
       # ============================================
-      # 6. Execute adaptive pytest
+      # 8. Execute adaptive pytest
       # ============================================
       - name: Run adaptive tests
         run: |
@@ -48,7 +60,7 @@ jobs:
           docker run ml-pipeline pytest $TEST_PATH -v --json-report --json-report-file=results.json
 
       # ============================================
-      # 7. Upload test results
+      # 9. Upload test results
       # ============================================
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -57,7 +69,7 @@ jobs:
           path: results.json
 
       # ============================================
-      # 8. Upload ML outputs
+      # 10. Upload ML outputs
       # ============================================
       - name: Upload ML outputs
         uses: actions/upload-artifact@v4
@@ -66,3 +78,7 @@ jobs:
           path: |
             outputs/metrics.json
             outputs/risk_prediction.json
+            outputs/anomaly_summary.json
+            outputs/cluster_summary.json
+            outputs/anomaly_results.csv
+            outputs/cluster_results.csv

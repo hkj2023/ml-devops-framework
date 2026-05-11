@@ -1,0 +1,6 @@
+{
+    "model": "IsolationForest",
+    "total_samples": 16000,
+    "anomalies_detected": 800,
+    "anomaly_rate": 0.05
+}
