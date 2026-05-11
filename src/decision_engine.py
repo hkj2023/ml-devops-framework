@@ -4,13 +4,15 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 RISK_PATH = os.path.join(BASE_DIR, "..", "outputs", "risk_prediction.json")
 
+
 def decide_test_path(risk_level):
+    # OPTION 1 FIX: always run existing test suite
     if risk_level == "HIGH":
-        return "tests/full/"
+        return "tests/"
     elif risk_level == "MEDIUM":
-        return "tests/critical/"
+        return "tests/"
     else:
-        return "tests/unit/"
+        return "tests/"
 
 
 def main():
@@ -20,7 +22,6 @@ def main():
     with open(RISK_PATH, "r") as f:
         data = json.load(f)
 
-    # ✔ FIXED: correct key from your JSON
     risk = data["risk_level"]
 
     test_path = decide_test_path(risk)
