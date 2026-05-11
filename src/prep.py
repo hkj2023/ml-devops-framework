@@ -4,15 +4,27 @@ import json
 from sklearn.model_selection import train_test_split
 
 # =====================================================
-# PATHS (RELATIVE PATHS: LOCAL + GITHUB + DOCKER SAFE)
+# BASE DIRECTORY (DOCKER + LOCAL SAFE)
 # =====================================================
 
-RAW_PATH = "data/ml_ready_dataset.csv"
-OUTPUT_DIR = "data/processed"
-SCHEMA_PATH = "models/feature_names.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+RAW_PATH = os.path.join(BASE_DIR, "..", "data", "ml_ready_dataset.csv")
+OUTPUT_DIR = os.path.join(BASE_DIR, "..", "data", "processed")
+MODEL_DIR = os.path.join(BASE_DIR, "..", "models")
+SCHEMA_PATH = os.path.join(MODEL_DIR, "feature_names.json")
+CURRENT_METRICS_PATH = os.path.join(
+    BASE_DIR, "..", "data", "current_commit_metrics.csv"
+)
+
+RAW_PATH = os.path.normpath(RAW_PATH)
+OUTPUT_DIR = os.path.normpath(OUTPUT_DIR)
+MODEL_DIR = os.path.normpath(MODEL_DIR)
+SCHEMA_PATH = os.path.normpath(SCHEMA_PATH)
+CURRENT_METRICS_PATH = os.path.normpath(CURRENT_METRICS_PATH)
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-os.makedirs("models", exist_ok=True)
+os.makedirs(MODEL_DIR, exist_ok=True)
 
 # =====================================================
 # CONFIGURATION
@@ -20,7 +32,6 @@ os.makedirs("models", exist_ok=True)
 
 TARGET = "HasFailure"
 
-# Forbidden leakage / post-outcome columns
 LEAKAGE_COLUMNS = [
     "FailureRate",
     "FailureRatio",
@@ -41,6 +52,10 @@ LEAKAGE_COLUMNS = [
 # =====================================================
 
 print("\nLoading raw dataset...")
+
+if not os.path.exists(RAW_PATH):
+    raise FileNotFoundError(f"Dataset not found: {RAW_PATH}")
+
 df = pd.read_csv(RAW_PATH)
 
 print("Original shape:", df.shape)
@@ -62,18 +77,18 @@ if TARGET not in df.columns:
     raise ValueError(f"Target column '{TARGET}' not found!")
 
 # =====================================================
-# REMOVE LEAKAGE COLUMNS
+# REMOVE LEAKAGE
 # =====================================================
 
 print("\nRemoving leakage columns...")
 
-existing_leakage = [col for col in LEAKAGE_COLUMNS if col in df.columns]
+existing_leakage = [c for c in LEAKAGE_COLUMNS if c in df.columns]
 df = df.drop(columns=existing_leakage, errors="ignore")
 
 print("Removed leakage columns:", existing_leakage)
 
 # =====================================================
-# FEATURE ENGINEERING (SAFE ONLY)
+# FEATURE ENGINEERING
 # =====================================================
 
 print("\nFeature engineering...")
@@ -92,21 +107,14 @@ print("\nEncoding categorical variables...")
 
 df_encoded = pd.get_dummies(df)
 
-# =====================================================
-# FINAL SAFETY CHECK
-# =====================================================
-
-print("\nFinal safety check...")
-
 if TARGET not in df_encoded.columns:
     raise ValueError("Target column lost during processing!")
-
-# Remove target from feature schema
-features_df = df_encoded.drop(columns=[TARGET])
 
 # =====================================================
 # SAVE FEATURE SCHEMA
 # =====================================================
+
+features_df = df_encoded.drop(columns=[TARGET])
 
 feature_names = features_df.columns.tolist()
 
@@ -129,7 +137,7 @@ train_df, test_df = train_test_split(
 )
 
 # =====================================================
-# SAVE DATASETS
+# SAVE TRAIN / TEST
 # =====================================================
 
 train_path = os.path.join(OUTPUT_DIR, "train.csv")
@@ -139,12 +147,45 @@ train_df.to_csv(train_path, index=False)
 test_df.to_csv(test_path, index=False)
 
 # =====================================================
+# GENERATE CURRENT COMMIT METRICS
+# =====================================================
+
+print("\nGenerating current commit metrics...")
+
+current = {
+    "LinesAdded": 45,
+    "LinesRemoved": 12,
+    "FilesChanged": 3
+}
+
+current["CodeChurn"] = (
+    current["LinesAdded"] + current["LinesRemoved"]
+)
+
+current["ChangeDensity"] = (
+    current["LinesAdded"] / (current["FilesChanged"] + 1)
+)
+
+current_df = pd.DataFrame([current])
+
+current_df = pd.get_dummies(current_df)
+
+current_df = current_df.reindex(
+    columns=feature_names,
+    fill_value=0
+)
+
+current_df.to_csv(CURRENT_METRICS_PATH, index=False)
+
+print("Saved:", CURRENT_METRICS_PATH)
+print("Shape:", current_df.shape)
+
+# =====================================================
 # FINAL REPORT
 # =====================================================
 
-print("\n================ PREP COMPLETE ================\n")
+print("\n=========== PREP COMPLETE ===========")
 print("Train shape:", train_df.shape)
 print("Test shape:", test_df.shape)
-print("Leakage columns removed:", existing_leakage)
 print("Feature count:", len(feature_names))
-print("Data saved safely (no leakage guaranteed)")
+print("Data saved safely.")

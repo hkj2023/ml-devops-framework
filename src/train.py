@@ -2,13 +2,12 @@ import pandas as pd
 import joblib
 import json
 import os
-
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, roc_auc_score
 import mlflow
 
+from sklearn.ensemble import RandomForestClassifier
+
 # ============================================
-# BASE DIRECTORY (CRITICAL FIX)
+# BASE DIRECTORY
 # ============================================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -22,7 +21,7 @@ MODEL_DIR = os.path.normpath(MODEL_DIR)
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 # ============================================
-# LOAD DATA (SAFETY CHECK)
+# LOAD TRAINING DATA
 # ============================================
 
 print("Loading training data...")
@@ -36,14 +35,14 @@ TARGET = "HasFailure"
 
 print("Training data shape:", train_df.shape)
 
+if TARGET not in train_df.columns:
+    raise ValueError(f"Target column '{TARGET}' missing")
+
 # ============================================
 # FEATURES / TARGET
 # ============================================
 
 print("Separating features and target...")
-
-if TARGET not in train_df.columns:
-    raise ValueError("Target column missing in training data")
 
 X_train = train_df.drop(columns=[TARGET])
 y_train = train_df[TARGET]
@@ -67,43 +66,16 @@ model.fit(X_train, y_train)
 print("Model training complete.")
 
 # ============================================
-# METRICS
-# ============================================
-
-y_pred = model.predict(X_train)
-y_prob = model.predict_proba(X_train)[:, 1]
-
-accuracy = accuracy_score(y_train, y_pred)
-roc_auc = roc_auc_score(y_train, y_prob)
-
-print("Train Accuracy:", accuracy)
-print("Train ROC-AUC:", roc_auc)
-
-# ============================================
-# MLFLOW
-# ============================================
-
-mlflow.set_tracking_uri("file:./mlruns")
-
-with mlflow.start_run():
-    mlflow.log_param("model", "RandomForest")
-    mlflow.log_param("n_estimators", 200)
-    mlflow.log_param("max_depth", 10)
-
-    mlflow.log_metric("train_accuracy", accuracy)
-    mlflow.log_metric("train_roc_auc", roc_auc)
-
-# ============================================
 # SAVE MODEL
 # ============================================
 
-model_path = os.path.join(MODEL_DIR, "hasfailure_model.pkl")
+model_path = os.path.join(MODEL_DIR, "model.pkl")
 joblib.dump(model, model_path)
 
 print("Model saved:", model_path)
 
 # ============================================
-# SAVE FEATURES
+# SAVE FEATURE NAMES
 # ============================================
 
 feature_names = X_train.columns.tolist()
@@ -114,5 +86,16 @@ with open(feature_path, "w") as f:
     json.dump(feature_names, f, indent=4)
 
 print("Feature names saved:", feature_path)
+
+# ============================================
+# LOG TO MLFLOW
+# ============================================
+
+mlflow.set_tracking_uri("file:./mlruns")
+
+with mlflow.start_run():
+    mlflow.log_param("model", "RandomForest")
+    mlflow.log_param("n_estimators", 200)
+    mlflow.log_param("max_depth", 10)
 
 print("Training pipeline completed successfully.")

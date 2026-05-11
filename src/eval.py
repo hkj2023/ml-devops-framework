@@ -5,47 +5,55 @@ import os
 
 from sklearn.metrics import (
     accuracy_score,
-    balanced_accuracy_score,
-    roc_auc_score,
-    classification_report,
-    confusion_matrix
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score
 )
 
 # =====================================================
-# PATHS (RELATIVE PATHS)
+# BASE DIRECTORY (DOCKER + LOCAL SAFE)
 # =====================================================
 
-DATA_PATH = "data/processed/test.csv"
-MODEL_PATH = "models/hasfailure_model.pkl"
-FEATURE_PATH = "models/feature_names.json"
-OUTPUT_PATH = "outputs/evaluation_metrics.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-os.makedirs("outputs", exist_ok=True)
+DATA_PATH = os.path.join(BASE_DIR, "..", "data", "processed", "test.csv")
+MODEL_PATH = os.path.join(BASE_DIR, "..", "models", "model.pkl")
+FEATURE_PATH = os.path.join(BASE_DIR, "..", "models", "feature_names.json")
+OUTPUT_PATH = os.path.join(BASE_DIR, "..", "outputs", "metrics.json")
+
+DATA_PATH = os.path.normpath(DATA_PATH)
+MODEL_PATH = os.path.normpath(MODEL_PATH)
+FEATURE_PATH = os.path.normpath(FEATURE_PATH)
+OUTPUT_PATH = os.path.normpath(OUTPUT_PATH)
+
+os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+
+TARGET = "HasFailure"
 
 # =====================================================
 # LOAD TEST DATA
 # =====================================================
 
-print("\n================ LOADING TEST DATA ================\n")
+print("\n====== LOADING TEST DATA ======\n")
 
 df = pd.read_csv(DATA_PATH)
-
-TARGET = "HasFailure"
 
 # =====================================================
 # LOAD MODEL
 # =====================================================
 
-print("\n================ LOADING MODEL ================\n")
+print("Loading trained model...")
 
 model = joblib.load(MODEL_PATH)
-print("Model loaded successfully")
+
+print("Model loaded successfully.")
 
 # =====================================================
 # LOAD FEATURE SCHEMA
 # =====================================================
 
-print("\n================ LOADING FEATURE SCHEMA ================\n")
+print("Loading feature schema...")
 
 with open(FEATURE_PATH, "r") as f:
     feature_names = json.load(f)
@@ -53,17 +61,17 @@ with open(FEATURE_PATH, "r") as f:
 print(f"Expected features: {len(feature_names)}")
 
 # =====================================================
-# SPLIT FEATURES / TARGET
+# PREPARE FEATURES
 # =====================================================
 
 X = df[feature_names]
 y = df[TARGET]
 
 # =====================================================
-# RUN PREDICTION
+# RUN PREDICTIONS
 # =====================================================
 
-print("\n================ RUNNING PREDICTION ================\n")
+print("Running evaluation...")
 
 y_pred = model.predict(X)
 y_prob = model.predict_proba(X)[:, 1]
@@ -72,42 +80,30 @@ y_prob = model.predict_proba(X)[:, 1]
 # COMPUTE METRICS
 # =====================================================
 
-print("\n================ COMPUTING METRICS ================\n")
-
-accuracy = accuracy_score(y, y_pred)
-balanced_acc = balanced_accuracy_score(y, y_pred)
-roc_auc = roc_auc_score(y, y_prob)
-
-conf_matrix = confusion_matrix(y, y_pred).tolist()
-
-class_report = classification_report(
-    y,
-    y_pred,
-    output_dict=True,
-    zero_division=0
-)
+metrics = {
+    "accuracy": round(accuracy_score(y, y_pred), 2),
+    "precision": round(precision_score(y, y_pred), 2),
+    "recall": round(recall_score(y, y_pred), 2),
+    "f1_score": round(f1_score(y, y_pred), 2),
+    "auroc": round(roc_auc_score(y, y_prob), 2)
+}
 
 # =====================================================
 # SAVE METRICS
 # =====================================================
 
-metrics = {
-    "accuracy": float(accuracy),
-    "balanced_accuracy": float(balanced_acc),
-    "roc_auc": float(roc_auc),
-    "confusion_matrix": conf_matrix,
-    "classification_report": class_report
-}
-
 with open(OUTPUT_PATH, "w") as f:
     json.dump(metrics, f, indent=4)
 
 # =====================================================
-# FINAL REPORT
+# DISPLAY RESULTS
 # =====================================================
 
-print("\n================ FINAL RESULTS ================\n")
-print("Accuracy:", accuracy)
-print("Balanced Accuracy:", balanced_acc)
-print("ROC-AUC:", roc_auc)
-print(f"\nMetrics saved to: {OUTPUT_PATH}")
+print("\n====== MODEL EVALUATION RESULTS ======\n")
+print(f"Accuracy  : {metrics['accuracy']}")
+print(f"Precision : {metrics['precision']}")
+print(f"Recall    : {metrics['recall']}")
+print(f"F1-score  : {metrics['f1_score']}")
+print(f"AUROC     : {metrics['auroc']}")
+
+print("\nSaved:", OUTPUT_PATH)

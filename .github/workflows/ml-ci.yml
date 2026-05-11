@@ -9,29 +9,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ============================================
+      # 1. Checkout code
+      # ============================================
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # ============================================
+      # 2. Build Docker image
+      # ============================================
       - name: Build Docker image
         run: docker build -t ml-pipeline .
 
-      # ======================
-      # RUN EVERYTHING INSIDE DOCKER
-      # ======================
-
-      - name: Run data prep
-        run: docker run ml-pipeline python src/prep.py
-
-      - name: Train model
-        run: docker run ml-pipeline python src/train.py
-
+      # ============================================
+      # 3. Evaluate pre-trained model
+      # ============================================
       - name: Evaluate model
         run: docker run ml-pipeline python src/eval.py
 
-      - name: Run tests (module1)
-        run: docker run ml-pipeline pytest tests/test_module1.py -v --json-report --json-report-file=results.json
+      # ============================================
+      # 4. Run inference (risk prediction)
+      # ============================================
+      - name: Run inference
+        run: docker run ml-pipeline python src/inference.py
+
+      # ============================================
+      # 5. Run decision engine (adaptive testing)
+      # ============================================
+      - name: Run decision engine
+        run: docker run ml-pipeline python src/decision_engine.py > test_path.txt
+
+      # ============================================
+      # 6. Execute adaptive pytest
+      # ============================================
+      - name: Run adaptive tests
+        run: |
+          TEST_PATH=$(cat test_path.txt)
+          docker run ml-pipeline pytest $TEST_PATH -v --json-report --json-report-file=results.json
+
+      # ============================================
+      # 7. Upload test results
+      # ============================================
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: module1-test-results
+          name: ml-test-results
           path: results.json
+
+      # ============================================
+      # 8. Upload ML outputs
+      # ============================================
+      - name: Upload ML outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ml-outputs
+          path: |
+            outputs/metrics.json
+            outputs/risk_prediction.json

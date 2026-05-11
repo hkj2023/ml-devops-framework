@@ -1,0 +1,14 @@
+artifact_uri: file:C:/Users/OLLRP/Documents/Framework/ml-devops-framework/mlruns/0/dfd77c70b16d4af0afb311f5bd84cff0/artifacts
+end_time: 1778435868017
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: dfd77c70b16d4af0afb311f5bd84cff0
+run_name: able-bird-296
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778435867872
+status: 3
+tags: []
+user_id: OLLRP
