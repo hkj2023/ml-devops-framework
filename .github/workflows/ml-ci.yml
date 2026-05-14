@@ -24,8 +24,9 @@ jobs:
       # ============================================
       # 3. Run anomaly detection
       # ============================================
-      - name: Run anomaly detection
-        run: docker run --rm -v ${{ github.workspace }}:/app ml-pipeline python src/anomaly.py
+      - name: Run Isolation Forest evaluation
+        run: docker run --rm \-v ${{ github.workspace }}:/app \ml-pipeline\python tests/IsolationForestTest/if_eval.py
+        
 
       # ============================================
       # 4. Run clustering analysis
