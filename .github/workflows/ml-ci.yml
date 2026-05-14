@@ -10,7 +10,7 @@ jobs:
 
     steps:
       # ============================================
-      # 1. Checkout code
+      # 1. Checkout repo
       # ============================================
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -22,67 +22,62 @@ jobs:
         run: docker build -t ml-pipeline .
 
       # ============================================
-      # 3. Run anomaly detection
+      # 3. Run Isolation Forest evaluation
       # ============================================
-      - name: Run Isolation Forest evaluation
-        run: docker run --rm \-v ${{ github.workspace }}:/app \ml-pipeline\python tests/IsolationForestTest/if_eval.py
-        
-
-      # ============================================
-      # 4. Run clustering analysis
-      # ============================================
-      - name: Run clustering analysis
-        run: docker run --rm -v ${{ github.workspace }}:/app ml-pipeline python src/clustering.py
-
-      # ============================================
-      # 5. Evaluate model
-      # ============================================
-      - name: Evaluate model
-        run: docker run --rm -v ${{ github.workspace }}:/app ml-pipeline python src/eval.py
-
-      # ============================================
-      # 6. Run inference
-      # ============================================
-      - name: Run inference
-        run: docker run --rm -v ${{ github.workspace }}:/app ml-pipeline python src/inference.py
-
-      # ============================================
-      # 7. Run decision engine
-      # ============================================
-      - name: Run decision engine
+      - name: Run IF evaluation tests
         run: |
-          docker run --rm -v ${{ github.workspace }}:/app ml-pipeline \
-          python src/decision_engine.py > test_path.txt
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            ml-pipeline \
+            pytest tests/IsolationForestTest/test_if_eval.py -v
 
       # ============================================
-      # 8. Execute adaptive pytest
+      # 4. Run Random Forest evaluation
       # ============================================
-      - name: Run adaptive tests
+      - name: Run RF evaluation tests
         run: |
-          TEST_PATH=$(cat test_path.txt)
-          docker run --rm -v ${{ github.workspace }}:/app ml-pipeline \
-          pytest $TEST_PATH -v --json-report --json-report-file=results.json
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            ml-pipeline \
+            pytest tests/RandomForestTest/test_rf_eval.py -v
 
       # ============================================
-      # 9. Upload test results
+      # 5. Run Isolation Forest inference
       # ============================================
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: ml-test-results
-          path: results.json
+      - name: Run IF inference
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            ml-pipeline \
+            python src/IsolationForest/if_inference.py
 
       # ============================================
-      # 10. Upload ML outputs
+      # 6. Run Random Forest inference
       # ============================================
-      - name: Upload ML outputs
+      - name: Run RF inference
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            ml-pipeline \
+            python src/RandomForest/rf_inference.py
+
+      # ============================================
+      # 7. Run Decision Engine
+      # ============================================
+      - name: Run Decision Engine
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            ml-pipeline \
+            python src/decision_engine.py > outputs/decision.json
+
+      # ============================================
+      # 8. Upload artifacts
+      # ============================================
+      - name: Upload outputs
         uses: actions/upload-artifact@v4
         with:
           name: ml-outputs
           path: |
-            outputs/metrics.json
-            outputs/risk_prediction.json
-            outputs/anomaly_summary.json
-            outputs/cluster_summary.json
-            outputs/anomaly_results.csv
-            outputs/cluster_results.csv
+            outputs/*.json
+            outputs/*.csv
