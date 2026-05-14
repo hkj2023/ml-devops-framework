@@ -1,4 +1,6 @@
 {
-    "defect_probability": 0.95,
-    "risk_level": "HIGH"
+    "risk_score": 0.9946,
+    "risk_value": 3,
+    "risk_level": "HIGH",
+    "action": "RETEST_REQUIRED"
 }

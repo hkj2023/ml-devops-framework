@@ -6,4 +6,4 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "src/train.py"]
+CMD ["python", "src/RandomForest/rf_prep.py", "src/IsolationForest/if_prep.py"]

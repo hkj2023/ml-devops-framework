@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/OLLRP/Documents/Framework/ml-devops-framework/mlruns/520635894155689560/5460d2aeb4c746d59f6ff46ef2bde7cf/artifacts
+end_time: 1778698282676
+entry_point_name: ''
+experiment_id: '520635894155689560'
+lifecycle_stage: active
+run_id: 5460d2aeb4c746d59f6ff46ef2bde7cf
+run_name: selective-shoat-550
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778698282508
+status: 4
+tags: []
+user_id: OLLRP

@@ -12,7 +12,7 @@ import plotly.graph_objects as go
 # ============================================
 st.set_page_config(
     page_title="ML DevOps Framework Dashboard",
-    page_icon="🚀",
+    page_icon="",
     layout="wide"
 )
 # ============================================
@@ -21,7 +21,7 @@ st.set_page_config(
 
 # REFRESH_INTERVAL = 5  # seconds
 
-st.sidebar.title("⚙️ Dashboard Controls")
+st.sidebar.title("Dashboard Controls")
 # ===================================
 # auto_refresh = st.sidebar.toggle("Enable Auto Refresh", value=True)
 
@@ -73,7 +73,7 @@ cluster_df = load_csv(CLUSTER_RESULTS_FILE)
 # ============================================
 # HEADER
 # ============================================
-st.title("🚀 ML-Enabled DevOps Framework Dashboard")
+st.title("ML-Enabled DevOps Framework Dashboard")
 st.caption("Monitoring ML model, risk prediction, anomaly detection, clustering & CI/CD tests")
 
 st.divider()
@@ -124,7 +124,7 @@ else:
 # ============================================
 # RISK PREDICTION
 # ============================================
-st.subheader("⚠️ Risk Prediction")
+st.subheader("Risk Prediction")
 
 if risk:
     c1, c2 = st.columns([1, 2])
@@ -146,7 +146,7 @@ else:
 # ============================================
 # ANOMALY DETECTION
 # ============================================
-st.subheader("🕵️ Anomaly Detection")
+st.subheader("Anomaly Detection")
 
 if anomaly_summary:
     a1, a2 = st.columns(2)
@@ -176,7 +176,7 @@ else:
 # ============================================
 # CLUSTERING INSIGHTS
 # ============================================
-st.subheader("🧩 Clustering Insights")
+st.subheader("Clustering Insights")
 
 if cluster_summary:
     dist = cluster_summary.get("cluster_distribution", {})
@@ -199,7 +199,7 @@ else:
 # ============================================
 # TEST RESULTS
 # ============================================
-st.subheader("✅ Adaptive Test Results")
+st.subheader("Adaptive Test Results")
 
 if test_results:
     summary = test_results.get("summary", {})
@@ -214,4 +214,4 @@ else:
     st.info("No results.json found. Run pytest with --json-report.")
 
 st.divider()
-st.success("Dashboard loaded successfully 🚀")
+st.success("Dashboard loaded successfully")

@@ -8,3 +8,6 @@ pytest==9.0.3
 pytest-json-report
 exceptiongroup==1.2.0
 tomli==2.0.1
+streamlit
+plotly
+streamlit-autorefresh

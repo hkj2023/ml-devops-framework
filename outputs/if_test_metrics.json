@@ -1,0 +1,8 @@
+{
+    "model": "IsolationForest",
+    "total_samples": 4000,
+    "anomalies_detected": 405,
+    "anomaly_rate": 0.1013,
+    "silhouette_score": 0.027,
+    "execution_status": "SUCCESS"
+}

@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/OLLRP/Documents/Framework/ml-devops-framework/mlruns/520635894155689560/c3128e74b48f43b88636ca25097f919c/artifacts
+end_time: 1778699573914
+entry_point_name: ''
+experiment_id: '520635894155689560'
+lifecycle_stage: active
+run_id: c3128e74b48f43b88636ca25097f919c
+run_name: likeable-shoat-815
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778699536180
+status: 3
+tags: []
+user_id: OLLRP

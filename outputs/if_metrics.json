@@ -1,0 +1,18 @@
+{
+    "model": "IsolationForest",
+    "total_samples": 4000,
+    "anomalies_detected": 405,
+    "anomaly_rate": 0.1013,
+    "precision": 0.9852,
+    "recall": 0.1004,
+    "f1_score": 0.1822,
+    "auc_roc": 0.6551,
+    "true_negatives": 19,
+    "false_positives": 6,
+    "false_negatives": 3576,
+    "true_positives": 399,
+    "fpr": 0.24,
+    "fnr": 0.8996,
+    "detection_rate": 0.1004,
+    "execution_status": "SUCCESS"
+}

@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/OLLRP/Documents/Framework/ml-devops-framework/mlruns/520635894155689560/models/m-102faa92a194407fbb4399dad79f37d6/artifacts
+creation_timestamp: 1778699536306
+experiment_id: '520635894155689560'
+last_updated_timestamp: 1778699573868
+model_id: m-102faa92a194407fbb4399dad79f37d6
+model_type: null
+name: model
+source_run_id: c3128e74b48f43b88636ca25097f919c
+status: 2
+status_message: null

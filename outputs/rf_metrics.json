@@ -1,0 +1,15 @@
+{
+    "model": "RandomForestClassifier",
+    "total_samples": 4000,
+    "predicted_failure_rate": 0.978,
+    "accuracy": 0.9788,
+    "precision": 0.9972,
+    "recall": 0.9814,
+    "f1_score": 0.9892,
+    "true_negatives": 14,
+    "false_positives": 11,
+    "false_negatives": 74,
+    "true_positives": 3901,
+    "auroc": 0.9736,
+    "execution_status": "SUCCESS"
+}

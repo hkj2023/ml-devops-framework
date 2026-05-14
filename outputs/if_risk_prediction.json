@@ -1,0 +1,6 @@
+{
+    "risk_score": 1.0,
+    "risk_value": 3,
+    "risk_level": "HIGH",
+    "action": "RETEST_REQUIRED"
+}

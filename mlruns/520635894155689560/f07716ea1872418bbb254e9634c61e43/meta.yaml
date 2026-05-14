@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/OLLRP/Documents/Framework/ml-devops-framework/mlruns/520635894155689560/f07716ea1872418bbb254e9634c61e43/artifacts
+end_time: 1778698368758
+entry_point_name: ''
+experiment_id: '520635894155689560'
+lifecycle_stage: active
+run_id: f07716ea1872418bbb254e9634c61e43
+run_name: fearless-rook-840
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1778698368674
+status: 4
+tags: []
+user_id: OLLRP
