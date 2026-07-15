@@ -2,15 +2,11 @@ import pandas as pd
 import joblib
 import json
 import os
+import mlflow
+import mlflow.sklearn
 
-from sklearn.metrics import (
-    accuracy_score,
-    precision_score,
-    recall_score,
-    f1_score,
-    roc_auc_score,
-    confusion_matrix
-)
+from sklearn.ensemble import RandomForestClassifier
+from imblearn.over_sampling import SMOTE
 
 # ============================================
 # BASE DIRECTORY
@@ -18,12 +14,13 @@ from sklearn.metrics import (
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DATA_PATH = os.path.join(BASE_DIR, "..", "..", "data", "processed", "test.csv")
-MODEL_PATH = os.path.join(BASE_DIR, "..", "..", "models", "rf_model.pkl")
-FEATURE_PATH = os.path.join(BASE_DIR, "..", "..", "models", "rf_feature_names.json")
-OUTPUT_PATH = os.path.join(BASE_DIR, "..", "..", "outputs", "rf_metrics.json")
+TRAIN_PATH = os.path.join(BASE_DIR, "..", "..", "data", "processed", "train.csv")
+MODEL_DIR = os.path.join(BASE_DIR, "..", "..", "models")
 
-os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+TRAIN_PATH = os.path.normpath(TRAIN_PATH)
+MODEL_DIR = os.path.normpath(MODEL_DIR)
+
+os.makedirs(MODEL_DIR, exist_ok=True)
 
 TARGET = "HasFailure"
 
@@ -31,95 +28,93 @@ TARGET = "HasFailure"
 # LOAD DATA
 # ============================================
 
-print("\n====== LOADING TEST DATA ======\n")
-df = pd.read_csv(DATA_PATH)
+print("Loading training data...")
+df = pd.read_csv(TRAIN_PATH)
 
 # ============================================
-# LOAD MODEL
+# BASIC CLEANING
 # ============================================
 
-print("Loading Random Forest model...")
-model = joblib.load(MODEL_PATH)
+df = df.fillna(0)
 
 # ============================================
-# LOAD FEATURE SCHEMA
+# SPLIT FEATURES / TARGET
 # ============================================
 
-with open(FEATURE_PATH, "r") as f:
-    feature_names = json.load(f)
-
-# ============================================
-# SAFE FEATURE ALIGNMENT
-# ============================================
-
-X = df.reindex(columns=feature_names, fill_value=0)
+X = df.drop(columns=[TARGET], errors="ignore")
 y = df[TARGET]
 
-X = X.fillna(0)
-
 # ============================================
-# PREDICTIONS
+# ENCODE FEATURES (CRITICAL FIX)
 # ============================================
 
-y_prob = model.predict_proba(X)[:, 1]
+print("Encoding features...")
+X = pd.get_dummies(X)
 
-threshold = 0.5
-y_pred = (y_prob >= threshold).astype(int)
-
-# ============================================
-# CONFUSION MATRIX (USED INTERNALLY ONLY)
-# ============================================
-
-tn, fp, fn, tp = confusion_matrix(y, y_pred).ravel()
-
-predicted_failure_rate = y_pred.mean()
+print("Feature shape:", X.shape)
 
 # ============================================
-# METRICS
+# SMOTE BALANCING
 # ============================================
 
-metrics = {
-    "model": "RandomForestClassifier",
-    "total_samples": len(y),
+print("\nApplying SMOTE...")
 
-    "predicted_failure_rate": round(predicted_failure_rate, 4),
+smote = SMOTE(random_state=42)
+X, y = smote.fit_resample(X, y)
 
-    "accuracy": round(accuracy_score(y, y_pred), 4),
-    "precision": round(precision_score(y, y_pred, zero_division=0), 4),
-    "recall": round(recall_score(y, y_pred, zero_division=0), 4),
-    "f1_score": round(f1_score(y, y_pred, zero_division=0), 4),
-
-    "true_negatives": int(tn),
-    "false_positives": int(fp),
-    "false_negatives": int(fn),
-    "true_positives": int(tp),
-
-    "auroc": round(roc_auc_score(y, y_prob), 4),
-    "execution_status": "SUCCESS"
-}
+print("\nBalanced class distribution:")
+print(pd.Series(y).value_counts())
 
 # ============================================
-# SAVE RESULTS
+# TRAIN RANDOM FOREST
 # ============================================
 
-with open(OUTPUT_PATH, "w") as f:
-    json.dump(metrics, f, indent=4)
+print("\nTraining Random Forest...")
+
+model = RandomForestClassifier(
+    n_estimators=200,
+    max_depth=10,
+    random_state=42,
+    n_jobs=-1,
+    class_weight="balanced"
+)
+
+model.fit(X, y)
+
+print("Training complete.")
 
 # ============================================
-# PRINT RESULTS
+# SAVE MODEL
 # ============================================
 
-print("\n====== RANDOM FOREST RESULTS ======\n")
+model_path = os.path.join(MODEL_DIR, "rf_model.pkl")
+joblib.dump(model, model_path)
 
-print(f"Model                 : {metrics['model']}")
-print(f"Total Samples         : {metrics['total_samples']}")
-print(f"Predicted Failure Rate: {metrics['predicted_failure_rate']}")
+# ============================================
+# SAVE FEATURE SCHEMA
+# ============================================
 
-print(f"\nAccuracy  : {metrics['accuracy']}")
-print(f"Precision : {metrics['precision']}")
-print(f"Recall    : {metrics['recall']}")
-print(f"F1-score  : {metrics['f1_score']}")
-print(f"AUROC     : {metrics['auroc']}")
+feature_path = os.path.join(MODEL_DIR, "rf_feature_names.json")
 
-print("\nExecution Status:", metrics["execution_status"])
-print("\nSaved:", OUTPUT_PATH)
+with open(feature_path, "w") as f:
+    json.dump(X.columns.tolist(), f, indent=4)
+
+print("Model + feature schema saved.")
+
+# ============================================
+# MLFLOW TRACKING
+# ============================================
+
+mlflow.set_tracking_uri("sqlite:///mlflow.db")
+mlflow.set_experiment("rf-model")
+
+with mlflow.start_run():
+    mlflow.log_param("model", "RandomForest")
+    mlflow.log_param("n_estimators", 200)
+    mlflow.log_param("max_depth", 10)
+    mlflow.log_param("sampling", "SMOTE")
+    mlflow.log_param("features", X.shape[1])
+
+    mlflow.sklearn.log_model(model, name="model")
+
+print("RF training completed.")
