@@ -1,0 +1,42 @@
+[
+    {
+        "Model": "Isolation Forest",
+        "Detection Rate": 0.6896,
+        "Precision": 1.0,
+        "F1 Score": 0.8163,
+        "FPR": 0.0,
+        "FNR": 0.3104,
+        "AUROC": 0.9342,
+        "Training Time(sec)": 0.35
+    },
+    {
+        "Model": "Local Outlier Factor",
+        "Detection Rate": 0.4161,
+        "Precision": 0.9994,
+        "F1 Score": 0.5876,
+        "FPR": 0.04,
+        "FNR": 0.5839,
+        "AUROC": 0.8967,
+        "Training Time(sec)": 1.59
+    },
+    {
+        "Model": "One-Class SVM",
+        "Detection Rate": 0.9761,
+        "Precision": 0.9954,
+        "F1 Score": 0.9856,
+        "FPR": 0.72,
+        "FNR": 0.0239,
+        "AUROC": 0.9053,
+        "Training Time(sec)": 0.04
+    },
+    {
+        "Model": "DBSCAN",
+        "Detection Rate": 1.0,
+        "Precision": 0.9938,
+        "F1 Score": 0.9969,
+        "FPR": 1.0,
+        "FNR": 0.0,
+        "AUROC": 0,
+        "Training Time(sec)": 0.04
+    }
+]

@@ -1,0 +1,5 @@
+Model,Detection Rate,Precision,F1 Score,FPR,FNR,AUROC,Training Time(sec)
+DBSCAN,1.0,0.9938,0.9969,1.0,0.0,0.0,0.04
+One-Class SVM,0.9761,0.9954,0.9856,0.72,0.0239,0.9053,0.04
+Isolation Forest,0.6896,1.0,0.8163,0.0,0.3104,0.9342,0.35
+Local Outlier Factor,0.4161,0.9994,0.5876,0.04,0.5839,0.8967,1.59

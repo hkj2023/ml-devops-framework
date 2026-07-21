@@ -1,0 +1,7 @@
+Model,Accuracy,Precision,Recall,F1 Score,ROC AUC,Training Time(sec)
+Random Forest,0.9931,0.9937,0.9994,0.9966,0.9784,12.72
+Decision Tree,0.9866,0.995,0.9915,0.9932,0.5958,1.92
+Gaussian Naive Bayes,0.9209,1.0,0.9204,0.9586,0.9761,0.06
+Logistic Regression,0.9025,0.9997,0.9022,0.9484,0.9646,4.0
+KNN,0.8447,0.9934,0.8494,0.9157,0.4587,0.03
+Support Vector Machine,0.5922,0.9947,0.5928,0.7429,0.518,531.25

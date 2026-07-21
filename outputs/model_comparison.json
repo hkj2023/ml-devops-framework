@@ -1,0 +1,56 @@
+[
+    {
+        "Model": "Random Forest",
+        "Accuracy": 0.9931,
+        "Precision": 0.9937,
+        "Recall": 0.9994,
+        "F1 Score": 0.9966,
+        "ROC AUC": 0.9784,
+        "Training Time(sec)": 12.72
+    },
+    {
+        "Model": "Decision Tree",
+        "Accuracy": 0.9866,
+        "Precision": 0.995,
+        "Recall": 0.9915,
+        "F1 Score": 0.9932,
+        "ROC AUC": 0.5958,
+        "Training Time(sec)": 1.92
+    },
+    {
+        "Model": "Logistic Regression",
+        "Accuracy": 0.9025,
+        "Precision": 0.9997,
+        "Recall": 0.9022,
+        "F1 Score": 0.9484,
+        "ROC AUC": 0.9646,
+        "Training Time(sec)": 4.0
+    },
+    {
+        "Model": "Support Vector Machine",
+        "Accuracy": 0.5922,
+        "Precision": 0.9947,
+        "Recall": 0.5928,
+        "F1 Score": 0.7429,
+        "ROC AUC": 0.518,
+        "Training Time(sec)": 531.25
+    },
+    {
+        "Model": "KNN",
+        "Accuracy": 0.8447,
+        "Precision": 0.9934,
+        "Recall": 0.8494,
+        "F1 Score": 0.9157,
+        "ROC AUC": 0.4587,
+        "Training Time(sec)": 0.03
+    },
+    {
+        "Model": "Gaussian Naive Bayes",
+        "Accuracy": 0.9209,
+        "Precision": 1.0,
+        "Recall": 0.9204,
+        "F1 Score": 0.9586,
+        "ROC AUC": 0.9761,
+        "Training Time(sec)": 0.06
+    }
+]
